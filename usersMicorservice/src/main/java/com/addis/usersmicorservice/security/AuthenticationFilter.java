@@ -1,0 +1,104 @@
+package com.addis.usersmicorservice.security;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Date;
+
+import javax.servlet.FilterChain;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.core.env.Environment;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
+import com.addis.usersmicorservice.models.LoginRequestModel;
+import com.addis.usersmicorservice.models.UserDto;
+import com.addis.usersmicorservice.service.UserServiceImpl;
+import com.addis.usersmicorservice.service.UsersService;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
+
+
+public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
+	
+	private static Logger logger = LoggerFactory.getLogger(AuthenticationFilter.class);
+	
+	private UsersService usersService;
+	private Environment environment;
+	
+	public AuthenticationFilter(UsersService usersService, 
+			                    Environment environment,
+			                    AuthenticationManager authenticationManager) 
+	{
+		this.usersService = usersService;
+		this.environment = environment;
+		super.setAuthenticationManager(authenticationManager);
+	} 
+
+	
+	// WHEN USER SENDS HTTP REQUEST FOR LOGIN THIS METHOD IN SIDE AU..FILTER WILL BE INVOKED....
+	@Override 
+	public Authentication attemptAuthentication(HttpServletRequest request //@@ PARAMETER TO READ INPUT USERNAME AND PASSWORD
+			, HttpServletResponse response)throws AuthenticationException {
+			
+		try {
+			
+			LoginRequestModel creds = new ObjectMapper()//MAP THE VALUES OF INCOMING REQUEST WITH REQUESTMODEL CLASS
+					       .readValue(request.getInputStream(), LoginRequestModel.class);
+
+			//getAuthenticationManager() be INVOKED INSIDE UserSecurityConfiguration Class
+			return getAuthenticationManager().authenticate(
+					new UsernamePasswordAuthenticationToken(
+							creds.getEmail(), 
+							creds.getPassword(), 
+							new ArrayList<>()));
+
+		} catch (IOException e) {
+			throw new RuntimeException();
+		}
+
+	}
+	
+	//TAKE USERDETAILS-> GENERATE JWTOKEN->ADD to HTTP-RESPONSE HEADER TOKEN
+	@Override
+	protected void successfulAuthentication(HttpServletRequest req, HttpServletResponse res, FilterChain chain,
+			Authentication auth) throws IOException, ServletException {
+
+		// READS LIST OF PRINCIPALS/USERNAMES AUTHENTICATED FROM auth OBJECT
+		String userName = ((User) auth.getPrincipal()).getUsername();
+
+		UserDto userDetails = usersService.getUserDetailsByEmail(userName);
+
+		String token = Jwts.builder().setSubject(userDetails.getUserId())
+				.setExpiration(new Date(
+						System.currentTimeMillis() + Long.parseLong(environment.getProperty("token.expiration_time"))))
+				.signWith(SignatureAlgorithm.HS512, environment.getProperty("token.secret"))
+				.compact();
+		
+		logger.debug(token);
+		
+        // added for test/debug....
+		String s = environment.getProperty("name");
+		s.toString();
+		
+		
+		
+		
+		// WHILE LOGIN IF USERNAME AND PASSWORD IS CORRECT SPRING INVOKE THIS METHOD
+		// JSON-WEB-TOKEN WILL BE ADDED TO HTTP-HEADER ALONG WITH USERID
+		res.addHeader("jwtsToken", token);
+		res.addHeader("userId", userDetails.getUserId());
+
+	} 
+
+} 

@@ -1,0 +1,14 @@
+package com.rest.api.project.model.response;
+
+import lombok.Data;
+
+@Data
+public class UserRestResponse {
+	//@@ Response data for EndUser
+	
+	private String userId;
+	private String firstName;
+	private String lastName;
+	private String email;
+
+}

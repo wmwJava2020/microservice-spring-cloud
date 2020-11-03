@@ -1,0 +1,5 @@
+package com.rest.api.project.model.response;
+
+public class UserRest {
+
+}

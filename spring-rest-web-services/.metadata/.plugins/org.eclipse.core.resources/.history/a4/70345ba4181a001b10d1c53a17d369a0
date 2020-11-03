@@ -1,0 +1,82 @@
+{"properties": [
+  {
+    "name": "gateway.ip",
+    "type": "java.lang.String",
+    "description": "A description for 'gateway.ip'"
+  },
+  {
+    "name": "albums.url",
+    "type": "java.lang.String",
+    "description": "A description for 'albums.url'"
+  },
+  {
+    "name": "token.expiration_time",
+    "type": "java.lang.String",
+    "description": "A description for 'token.expiration_time'"
+  },
+  {
+    "name": "token.secret",
+    "type": "java.lang.String",
+    "description": "A description for 'token.secret'"
+  },
+  {
+    "name": "login.url.path",
+    "type": "java.lang.String",
+    "description": "A description for 'login.url.path'"
+  },
+  {
+    "name": "myName",
+    "type": "java.lang.String",
+    "description": "A description for 'myName'"
+  },
+  {
+    "name": "myName1",
+    "type": "java.lang.String",
+    "description": "A description for 'myName1'"
+  },
+  {
+    "name": "myName1",
+    "type": "java.lang.String",
+    "description": "A description for 'myName1'"
+  },
+  {
+    "name": "name",
+    "type": "java.lang.String",
+    "description": "A description for 'name'"
+  },
+  {
+    "name": "eureka.client.serviceUrl.defaultZone",
+    "type": "java.lang.String",
+    "description": "A description for 'eureka.client.serviceUrl.defaultZone'"
+  },
+  {
+    "name": "eureka.instance.instance-id",
+    "type": "java.lang.String",
+    "description": "A description for 'eureka.instance.instance-id'"
+  },
+  {
+    "name": "eureka.client.serviceUrl.defaultZone",
+    "type": "java.lang.String",
+    "description": "A description for 'eureka.client.serviceUrl.defaultZone'"
+  },
+  {
+    "name": "eureka.client.serviceUrl.defaultZone",
+    "type": "java.lang.String",
+    "description": "A description for 'eureka.client.serviceUrl.defaultZone'"
+  },
+  {
+    "name": "eureka.client.serviceUrl.defaultZone",
+    "type": "java.lang.String",
+    "description": "A description for 'eureka.client.serviceUrl.defaultZone'"
+  },
+  {
+    "name": "eureka.client.serviceUrl.defaultZone",
+    "type": "java.lang.String",
+    "description": "A description for 'eureka.client.serviceUrl.defaultZone'"
+  },
+  {
+    "name": "eureka.client.serviceUrl.defaultZone",
+    "type": "java.lang.String",
+    "description": "A description for 'eureka.client.serviceUrl.defaultZone'"
+  }
+]}

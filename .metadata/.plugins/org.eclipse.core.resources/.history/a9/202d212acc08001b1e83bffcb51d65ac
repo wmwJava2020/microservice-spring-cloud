@@ -1,0 +1,10 @@
+package com.ethio.entity;
+
+import javax.persistence.Entity;
+
+@Entity
+public class Coffe {
+
+	private long id;
+	private String name;
+}

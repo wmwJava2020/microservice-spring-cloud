@@ -1,0 +1,15 @@
+package com.rest.api.project.service.impl;
+
+import com.rest.api.project.dto.UserDto;
+import com.rest.api.project.service.UserService;
+
+public class UserServiceImpl implements UserService {
+
+
+	@Override
+	public UserDto createUser(UserDto user) {
+		
+		return null;
+	}
+
+}

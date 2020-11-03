@@ -1,0 +1,34 @@
+package com.ethio.service;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import com.ethio.entity.Coffe;
+
+public class CoffeServiceImpl implements CoffeService {
+
+	@Override
+	public List<Coffe> getCoffe(String Long) {
+		
+		List<Coffe> coffeList = new ArrayList<Coffe>();
+		
+		Coffe coffe1 = new Coffe();
+		coffe1.setId(1L);
+		coffe1.setName("ARABICA");
+		
+		Coffe coffe2 = new Coffe();
+		coffe2.setId(2L);
+		coffe2.setName("JIMMA");
+		
+		Coffe coffe3 = new Coffe();
+		coffe3.setId(3L);
+		coffe3.setName("SIDAMA");
+		
+		coffeList.add(coffe1);
+		coffeList.add(coffe2);
+		coffeList.add(coffe3);
+		
+		return null;
+	}
+
+}

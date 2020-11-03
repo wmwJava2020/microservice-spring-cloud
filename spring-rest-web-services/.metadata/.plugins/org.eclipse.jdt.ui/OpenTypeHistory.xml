@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<typeInfoHistroy>
+<typeInfo handle="=mobile-app-ws/src\/main\/java&lt;com.rest.api.project.service{UserService.java[UserService" modifiers="513" timestamp="1603840776308"/>
+<typeInfo handle="=mobile-app-ws/C:\/Program Files\/Java\/jdk1.8.0_131\/jre\/lib\/rt.jar&lt;java.nio.file.attribute(UserDefinedFileAttributeView.class[UserDefinedFileAttributeView" modifiers="1537" timestamp="1499307755890"/>
+<typeInfo handle="=mobile-app-ws/C:\/Users\/wonda\/.m2\/repository\/org\/springframework\/data\/spring-data-commons\/2.3.4.RELEASE\/spring-data-commons-2.3.4.RELEASE.jar&lt;org.springframework.data.repository(CrudRepository.class[CrudRepository" modifiers="1537" timestamp="1600367602251"/>
+<typeInfo handle="=mobile-app-ws/C:\/Users\/wonda\/.m2\/repository\/org\/springframework\/data\/spring-data-jpa\/2.3.4.RELEASE\/spring-data-jpa-2.3.4.RELEASE.jar&lt;org.springframework.data.jpa.repository.support(CrudMethodMetadata.class[CrudMethodMetadata" modifiers="1537" timestamp="1600367601726"/>
+<typeInfo handle="=mobile-app-ws/C:\/Users\/wonda\/.m2\/repository\/org\/springframework\/security\/spring-security-config\/5.3.4.RELEASE\/spring-security-config-5.3.4.RELEASE.jar&lt;org.springframework.security.config.annotation.web.configuration(WebSecurityConfigurerAdapter.class[WebSecurityConfigurerAdapter" modifiers="1057" timestamp="1599071180478"/>
+</typeInfoHistroy>

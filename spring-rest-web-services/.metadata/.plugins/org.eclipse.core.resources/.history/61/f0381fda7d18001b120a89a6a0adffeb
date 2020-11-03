@@ -1,0 +1,5 @@
+package com.rest.api.project.model.request;
+
+public class UserDetailsRequest {
+
+}

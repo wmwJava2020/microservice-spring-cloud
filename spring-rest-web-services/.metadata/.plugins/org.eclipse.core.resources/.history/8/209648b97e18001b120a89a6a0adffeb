@@ -1,0 +1,8 @@
+package com.rest.api.project.model.response;
+
+public class UserRestResponse {
+	
+	private String userId;
+	private 
+
+}

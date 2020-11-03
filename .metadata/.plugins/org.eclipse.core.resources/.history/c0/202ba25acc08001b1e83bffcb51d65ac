@@ -1,0 +1,5 @@
+package com.ethio.service;
+
+public class CoffeServiceImpl implements CoffeService {
+
+}

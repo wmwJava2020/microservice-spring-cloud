@@ -1,0 +1,77 @@
+package com.addis.usersmicorservice.security;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+
+import com.addis.usersmicorservice.service.UsersService;
+
+@Configuration
+@EnableWebSecurity
+public class UsersSecurityConfigrations extends WebSecurityConfigurerAdapter {
+	
+	private static final Logger LOGGER = LoggerFactory.getLogger(UsersSecurityConfigrations.class);
+
+	private Environment environment;
+	private UsersService usersService;
+	private BCryptPasswordEncoder bCryptPasswordEncoder;
+
+	@Autowired
+	public UsersSecurityConfigrations(Environment environment,
+			                         UsersService usersService,
+			                         BCryptPasswordEncoder bCryptPasswordEncoder) 
+	{
+		this.environment = environment;
+		this.usersService = usersService;
+		this.bCryptPasswordEncoder = bCryptPasswordEncoder;
+	}
+
+	@Override
+	protected void configure(HttpSecurity http) throws Exception {
+
+		//http.csrf().disable();
+        
+		 //@@ THIS LINE OF CODE PERMITS ALL INCOMING REQUEST
+		// http.authorizeRequests().antMatchers("/users/**").permitAll();
+
+		//@@ but this one permit request with / having certian ip address
+		http.authorizeRequests().antMatchers("/**").hasIpAddress(environment.getProperty("gateway.ip"))
+		        .and()
+			    .addFilter(getAuthenticationFilter()); //@@ INVOKING CUSTOM MADE AUTHENTICATION-FILTER from FILTER.CLASS
+        
+		//@@ TO DISABLE H2-CONSOLE  
+		http.headers().frameOptions().disable(); 
+	}
+
+	//CREATE A METHOD LOCALLY to INVOKE & RETURN OUR CUSTOM AUTHENTICATION FILTER CLASS obj to REGISTR on SPRING-SECURITY
+	private AuthenticationFilter getAuthenticationFilter() throws Exception {
+		
+    AuthenticationFilter authenticationFilter = new AuthenticationFilter(usersService, environment,authenticationManager());
+		
+		//@@ GETTING AUTHENTICATIONMANAGER in CUSTOME AUTHENTICATIONFILTERS JAVA CLASS
+		//@@ authenticationFilter.setAuthenticationManager(authenticationManager()); 
+    
+          //@@ SETTING URL PATH 
+          authenticationFilter.setFilterProcessesUrl(environment.getProperty("login.url.path"));
+		 
+		return authenticationFilter;
+	}
+	
+	//@@ INFORM SPRING WHICH SERVICE TO LOAD USERSDETAILS and WHICH pASSwORDeNCODER Used
+	@Override
+	protected void configure(AuthenticationManagerBuilder authBuilder) throws Exception {
+		
+		authBuilder.userDetailsService(usersService).passwordEncoder(bCryptPasswordEncoder);
+		
+		LOGGER.info("User Details and Password have been loaded");
+
+	}
+
+}

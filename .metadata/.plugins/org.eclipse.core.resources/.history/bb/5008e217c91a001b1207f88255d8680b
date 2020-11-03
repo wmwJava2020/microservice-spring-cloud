@@ -1,0 +1,100 @@
+package com.addis.usersmicorservice.controller;
+
+//import javax.validation.Valid;
+
+import org.modelmapper.ModelMapper;
+import org.modelmapper.convention.MatchingStrategies;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.addis.usersmicorservice.exception.UsersServiceException;
+import com.addis.usersmicorservice.models.UserDto;
+import com.addis.usersmicorservice.models.UserResponseModle;
+import com.addis.usersmicorservice.models.UsersDataModel;
+import com.addis.usersmicorservice.service.UsersService;
+
+@RestController
+@RequestMapping("users")
+public class UsersController {
+	
+	private static Logger logger = LoggerFactory.getLogger(UsersController.class);
+
+	@Autowired
+	Environment env;
+	
+	@Autowired
+	UsersService usersService;
+	
+	@GetMapping("/status/check")
+	public String status() {
+		System.out.println("-----------------  For Users Micorservices ---------------------");
+		return "User is working on PORT Number:" + env.getProperty("local.server.port")
+		+", with token="+ env.getProperty("token.secret"); 
+	}
+	
+	@PostMapping(produces = {MediaType.APPLICATION_XML_VALUE,MediaType.APPLICATION_JSON_VALUE},
+                consumes = {MediaType.APPLICATION_XML_VALUE,MediaType.APPLICATION_JSON_VALUE})	
+	public ResponseEntity<UserResponseModle> createUser(@RequestBody   UsersDataModel usersDataModel) {
+		 
+		//@@ MAP FEILDS from userDataModel to DataTransferObject/dto		
+		ModelMapper mapper = new ModelMapper();
+		mapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
+		
+		//@@ MAP DATA FROM USERDATEMODEL TO DTO CLASS
+		UserDto userDto = mapper.map(usersDataModel, UserDto.class);
+		
+		//@@ CREATE OBJECT OF DTO CLASS TO HOLD FEILDS TO BE MAPPED
+		UserDto dto = usersService.createUser(userDto);
+		
+		logger.info("DTO Object class loaded with cretaed UsersData......"); 
+		
+		//@@ CREATE CLASS OBJECT FOR RESPONSE MODEL[source=dto and dest=responseClass]
+		UserResponseModle responseModel = mapper.map(dto, UserResponseModle.class);
+		
+		 
+		 //@@ CREATEING NEW RESPONSE-ENTITY BACK TO THE SERVER WITH CRETAED STATUS RESPONSE
+		//@@ return new ResponseEntity<UserResponseModle>(HttpStatus.CREATED); 		
+		return ResponseEntity.status(HttpStatus.CREATED).body(responseModel);
+		
+	}
+	
+	@GetMapping(value="/userId",produces = MediaType.APPLICATION_XML_VALUE)
+    public ResponseEntity<UserResponseModle> getUser(@PathVariable("userId") String userId) throws UsersServiceException{
+		
+		//@@ SERVICE WILL RETURN USERDTO OBJECTS CONTAINING USER DETAILS AND LIST OF ABLUMS
+		UserDto userDto = usersService.getUserByUserId(userId);
+		
+		//@@ UNSERSERVICEIMPL WILL SETCH from USER-INTERACE-VIA-REPOSITORY INTERFACE and ADD IT TO DTO
+		//@@ MODELMAPEER WILL MAP SOURCE/DTO TO DESTINATION USER-RESPONSE-MODEL CLASS
+		UserResponseModle returnAlbums = new ModelMapper().map(userDto, UserResponseModle.class);
+		
+		//@@ RESPONSE-ENTITY RESPONDES TO END CLIENT AS OH STATUS WITH RETURND OBJECTS
+		return ResponseEntity.status(HttpStatus.OK).body(returnAlbums);
+		
+	}
+ 
+}
+
+
+
+
+
+
+
+
+
+
+
+
+

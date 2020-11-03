@@ -1,0 +1,17 @@
+#server.port=${PORT:0}
+server.port=1922
+spring.application.name=albums-ws
+
+eureka.client.serviceUrl.defaultZone = http://localhost:8010/eureka
+eureka.instance.instance-id=${spring.application.name}:${spring.application.instance_id:${random.value}}
+
+#spring.datasource.driverClassName=com.mysql.jdbc.Driver
+
+spring.devtools.restart.enabled = true
+
+#logging.file=albums-ws.log
+
+spring.rabbitmq.host=localhost
+spring.rabbitmq.port=15672
+spring.rabbitmq.username=guest
+spring.rabbitmq.password=guest

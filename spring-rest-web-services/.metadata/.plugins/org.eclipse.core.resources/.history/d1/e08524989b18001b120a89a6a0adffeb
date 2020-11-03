@@ -1,0 +1,9 @@
+package com.rest.api.project.service;
+
+import com.rest.api.project.dto.UserDto;
+
+public interface UserService {
+	
+	UserDto createUser(UserDto user);
+
+}

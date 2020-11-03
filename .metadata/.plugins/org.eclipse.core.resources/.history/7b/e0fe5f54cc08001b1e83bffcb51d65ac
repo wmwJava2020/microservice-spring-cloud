@@ -1,0 +1,12 @@
+package com.ethio.service;
+
+import org.springframework.stereotype.Service;
+
+import com.ethio.entity.Coffe;
+
+@Service
+public interface CoffeService {
+	
+	List<Coffe> coffeType = getCoffeType(String Long);
+
+}

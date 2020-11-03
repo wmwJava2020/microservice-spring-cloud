@@ -1,0 +1,8 @@
+package com.ethio.entity;
+
+@Entity
+public class Coffe {
+
+	private long id;
+	private String name;
+}

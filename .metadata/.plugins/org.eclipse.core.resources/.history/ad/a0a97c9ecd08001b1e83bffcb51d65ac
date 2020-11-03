@@ -1,0 +1,15 @@
+package com.ethio.service;
+
+import java.util.List;
+
+import com.ethio.entity.Coffe;
+
+public class CoffeServiceImpl implements CoffeService {
+
+	@Override
+	public List<Coffe> getCoffe(String Long) {
+		
+		return null;
+	}
+
+}

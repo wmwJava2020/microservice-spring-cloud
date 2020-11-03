@@ -1,0 +1,5 @@
+package com.rest.api.project.shared;
+
+public class Utils {
+
+}

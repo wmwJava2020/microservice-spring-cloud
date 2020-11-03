@@ -1,0 +1,185 @@
+package com.addis.usersmicorservice.service;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+
+import org.modelmapper.ModelMapper;
+import org.modelmapper.convention.MatchingStrategies;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.core.env.Environment;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
+
+import com.addis.usersmicorservice.controller.UsersController;
+import com.addis.usersmicorservice.models.AlbumsResponseModel;
+import com.addis.usersmicorservice.models.UserDto;
+import com.addis.usersmicorservice.models.UserEntity;
+import com.addis.usersmicorservice.repository.UsersRepository;
+
+
+@Service
+public class UserServiceImpl implements UsersService {
+	
+	private static Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
+
+	UsersRepository userRepository;
+    BCryptPasswordEncoder bCryptPasswordEncoder;
+    RestTemplate restTemplate;
+    Environment environment;
+	
+	@Autowired
+	public UserServiceImpl(
+			 UsersRepository userRepository
+			,BCryptPasswordEncoder bCryptPasswordEncoder
+			,RestTemplate restTemplate
+			,Environment environment) 
+	{
+		this.userRepository = userRepository;
+		this.bCryptPasswordEncoder = bCryptPasswordEncoder;
+		this.restTemplate = restTemplate;
+		this.environment = environment;
+	}
+
+	@Override
+	public UserDto createUser(UserDto userDto) {
+		
+		// CREATE NEW UUID VALUE	
+		userDto.setUserId(UUID.randomUUID().toString());
+		
+		//USE MODEL-MAPPER TO MAP DTO FEILDES TO ENTITY CLASS FEILDS
+		ModelMapper mapper = new ModelMapper();
+		
+		//CONFIGURE MATCHING STRATAGEY TO STRICT WHILE MAP.
+		mapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
+
+		// INVOKE MODLE-MAPPER TO MAP AND ASSIGN IT TO ENTITY CLASS OBJECT TO BE PERSISTED INTO DB
+		// MAP or TRANSFER DATA FROM Dto ----> UsereEntity CLASS
+		// SERVICES Imp is mapping two data Entities.
+		UserEntity userEntity = mapper.map(userDto, UserEntity.class);
+		
+		logger.debug("DTO objects are mapped with userEntity objects...");
+		
+		// SET ENCRYPTED-PASSWORD
+		userEntity.setEncryptedPassword(bCryptPasswordEncoder.encode(userEntity.getPassword()));
+		//userEntity.setEncryptedPassword("ፓስወርድ@#$%^ፓስዎርድ");  
+		
+		//INVOKE METHOD FROM REPOSITORY INTERFACE TO DO OUR ACTION[SAVE]
+		userRepository.save(userEntity);
+		
+		//USE MAPPER TO MAP FEILDS from ENTITY TO DTO CLASS
+		UserDto dto = mapper.map(userEntity, UserDto.class);
+		
+		return dto;
+	}
+
+	
+	//method from UsersServiceInterface implementation
+	@Override
+	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+		
+        // findByXXXX-->[database column-Name]CUSTOM METHOD INSIDE REPOSITORY and our username is Email
+		// ONCE findByEmail IS EXECUTED IT WILL RETURN AS AN ENTITY
+		UserEntity userEntity = userRepository.findByEmail(username);
+		
+		//WE CAN CKECK IF USER ENTITY IS NULL OR NOT
+		if(userEntity == null) throw new UsernameNotFoundException(username);
+		
+		//WE CREATE NEW USER OBJECT WHICH implements USERSDETAILS INTERACE
+		return new User(
+				 userEntity.getEmail()  // @param username 
+				,userEntity.getEncryptedPassword()  //@param password
+				,true // @param accountNonExpired boolean
+				,true // @param credentialsNonExpired boolean
+				,true // @param accountNonLocked boolean
+				,true // @param authorities [ the authorities that should be granted to the caller] list
+				,new ArrayList<>()); 
+	}
+ 
+
+	//findByEmail is custom method in usersRepository interface
+	//@Override
+	public UserDto getUserDetailsByEmail(String email) {
+		
+		UserEntity userEntity = userRepository.findByEmail(email);
+		
+		if(userEntity == null) throw new UsernameNotFoundException(email);
+		
+		return new ModelMapper().map(userEntity, UserDto.class);
+		
+	}
+	
+
+	@Override
+	public UserDto getUserByUserId(String userId)  {
+		
+		//PULLING DATA FROM REPOSITORY BY USERID AND ASSIGNEING BACK TO userEntity
+		UserEntity userEntity = userRepository.findByUserId(userId);
+		
+		//LOGIC if USERENTITY IS NULL OR NOT
+		if(userEntity == null) throw new UsernameNotFoundException("User Not found");
+		
+		//MAPPING USERENTITY SOURCE -- to --> USERDTO CLASS DESTINATION FOR DATA TRANSFERING.....
+		UserDto userDto = new ModelMapper().map(userEntity, UserDto.class);
+		
+		
+	
+		System.out.println("***********    CALLING TO ALBUMS MICORSERVICE  **************");
+		
+		//String albumsUrl = "http://localhost:1922/users/78976854/albums";
+		
+		//@@ WE CAN USE[APPLICATION NAME] IF WE HAVE DYNAMIC PORT NUMBER
+		//String albumsUrl = "http://ALBUMS-WS/users/78976854/albums";
+		
+		//@@ FOR DYNAMIC USERID
+		String albumsUrl = String.format("http://localhost:1922/users/%s/albums", userId);
+		
+		//@@ TO USE DYNAMIC URL WE CAN SET IT IN PROPERTIES FILES AND USE IT INSIDE A CODE....
+		//String albumsUrl = String.format(environment.getProperty("albums.url"),userId);
+		
+		//@@ WHEN exchange  METHOD IS CALLED ON restTemplate OBJECT IT WILL SEND HTTP GET REQUEST to albumsUrl, and 
+		//@@ SINCE WE DEFINE A RESPONSE TYPE [albumResponseModel]--> CONVERTED TO ARRAYLIST AND assigned --> [albumListResponse]
+		ResponseEntity<List<AlbumsResponseModel>> listAlbums = 
+				restTemplate.exchange(albumsUrl
+						,HttpMethod.GET
+						,null//@@ [IF METADATA IS NULL]
+				        ,new ParameterizedTypeReference<List<AlbumsResponseModel>>() {			   		 
+			   	 });
+		
+		//@@ TO EXTRACT A LIST OF ALMUBS WE USE getBody() METHOD AND ASSIGN BACK TO albumList
+		List<AlbumsResponseModel> albumList = listAlbums.getBody();
+		
+		//@@ LIST OF ALBUMS EXTRACTED WOULD BE ASSIGNED TO OBJECT ARRAY OF TYPE LIST [albumList]		
+		userDto.setAlbums(albumList);
+		
+		//@@ TO BE RETURNED FROM CONTROLLER CLASS WE HAVE TO ASSIGNED THESE OF ALBUMS TO DTO CLASS
+		return userDto;
+		
+		
+	} 
+
+
+
+	
+
+
+
+
+
+
+
+
+
+
+
+
+}
